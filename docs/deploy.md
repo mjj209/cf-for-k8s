@@ -52,6 +52,13 @@ To deploy cf-for-k8s as is, the cluster should:
    $ ./bin/install-cf.sh /tmp/cf-values.yml
    ```
 
+   If you wish to include one or more overlays in your installation, you can use `ytt` and `kapp` directly, instead of the `install-cf.sh` script:
+   ```bash
+   $ ytt -f ./config -f ./config-optional/remove-resource-requirements.yml -f /tmp/cf-values.yml > /tmp/cf-template.yml
+   $ kapp deploy -a cf -f /tmp/cf-template.yml
+   ```
+   Note: you can include as many overlay files as desired in the `ytt` command, but each one requires its own `-f` argument
+
 1. Configure DNS on your IaaS provider to point the wildcard subdomain of your
    system domain and the wildcard subdomain of all apps domains to point to external IP
    of the Istio Ingress Gateway service. You can retrieve the external IP of this service by running
