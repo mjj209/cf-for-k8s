@@ -1,0 +1,37 @@
+Experiment 1:
+
+Try to figure out a low hanging fruit of what may be causing lots of test failure by digging into the failure of a simple cf push test.
+
+* Need to identify a good simple test.
+* Run that test
+* Dig in.
+
+
+Running line 75 in lifecycle.go, since it seems to just pushing a simple go app.
+
+Expections: we expect this to succeed.
+
+
+Outcome: failure with this text
+Staging app and tracing logs...
+Error staging application: Stager error: Kpack build failed
+FAILED
+
+
+Notes from investigation:
+* hard to debug with so many other failed pods and builds in cf-system from previous cats runs
+ - manually deleting the builds and pods was only temporary -- they came back
+ - we're hoping that deleting the apps backing those builds (via cf delete-org) will prevent builds from being recreated.
+ - that didn't fix it; the builds still came back. we're confused.
+ - john remembers hand deleting the build pods in the past and having them stay dead.
+ - ???
+ - we don't want to get distracted by this.
+ - will try to just delete cf-system (and postgres?)
+ - trying to delete cf-system and cf-db; the postgres PVC timed out deleting on fresno. Dunno why. Claimed vashon
+
+ - we deployed to the vashon cluster and then ran the same single test as mentioned above.
+ - we modified the catnip app location in the cats settings, so that Assets.Catnip points to the source code, not the compiled binary.
+ - we saw it succeed during staging, but timed-out while waiting to start. We suspect this is due to the -c flag given to cf push: `cf push -c ./catnip`.
+ - we removed the `... -c ` and tried again.  Same symptoms.
+ - suggestion: try `cf push` manually with the same asset and see what's different (and get away from a timeout).
+
