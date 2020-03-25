@@ -1,0 +1,63 @@
+Expderiment 4:
+
+If we add a Procfile to catnip, will that make it work with old-school Binary Buildpack and the procfile CNB?
+
+Expectation: This should work. Binary buildpack in the old world == procfile-cnb in the new world, except that the Procfile itself is required.
+
+Experimental setup:
+* I've undone the change we previously made to point the Catnip app path to its source.
+* I've added a simple Procfile (contents are 'web: ./catnip') as a peer of the catnip binary.
+* To be clear, Catnip pushes are now just pushing the binary and the Procfile for this experiment.
+
+Notes:
+To start with, keeping our old friendly It block still focused (see experiment 1 notes).
+Pushing with a single ginkgo/cats node.
+
+Result:
+  Waiting for API to complete processing files...
+  Staging app and tracing logs...
+  Error staging application: Stager error: Kpack build failed
+  FAILED
+
+Logs from the 'detect' container of what I believe is the correct build pod:
+  ERROR: No buildpack groups passed detection.
+  ERROR: failed to detect: no buildpacks participating
+
+Why did detection fail?
+ - Is there a problem with the Procfile I added? (Location, name, contents)
+ - Is the procfile-cnb running in this builder?
+ - Is the -c messing things up?
+    -- unlikely; would expect that to only surface when starting the app.
+
+As part of answering the question on line 27, I wanted to verify that the size of the upload matches the size of the catnip
+binary and the Procfile. But that brought up more questions:
+
+Upload output:
+  Creating app CATS-1-APP-e3ea52878e23f509...
+  Mapping routes...
+  Comparing local files to remote cache...
+  Packaging files to upload...
+  Uploading files...
+   168 B / 168 B [=======================================================================================================================================================] 100.00
+  % 1s
+
+File sizes:
+  js+jr $ ls -lh assets/catnip/bin/
+  total 7.8M
+  -rw-r--r-- 1 jryan staff   14 Mar 25 16:23 Procfile
+  -rwxr-xr-x 1 jryan staff 7.8M Mar 25 16:32 catnip
+
+Possible explanation: resource matching is recognizing that the catnip binary doesn't need to be re-uploaded.
+
+Response to question: is there a problem with the Procfile I added? (Location, name, contents)
+- I think I've doubled checked all of these. Procfile seems correct.
+
+Investigating 'Is the procfile-cnb running in this builder?'
+- It appears so. I inspected the yaml of the builder in the cf-workloads-staging namespace and saw this under status/builderMetadata:
+  - id: org.cloudfoundry.procfile
+    version: v1.1.12
+
+
+Suggestion for experiment 5, if we want to keep digging on this: can we manually push catnip with a procfile and have it work?
+- nevermind about full 'experiment 5'. I just did it real quick and got the same error as this experiment.
+
