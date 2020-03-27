@@ -6,7 +6,7 @@ cat <<EOF
 {
   "api": "api.vashon.k8s-dev.relint.rocks",
   "admin_user": "admin",
-  "admin_password": "$(yq .cf_admin_password /tmp/vashon-cf-values.yml -r)",
+  "admin_password": "$(cat /tmp/vashon-password)",
   "apps_domain": "vashon.k8s-dev.relint.rocks",
   "artifacts_directory": "logs",
   "skip_ssl_validation": true,
