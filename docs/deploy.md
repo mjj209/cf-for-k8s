@@ -1,5 +1,6 @@
 TODO: 
 - Wait for doc stories to get merged
+- Isn't kubectl required. Not sure why it is separated out from the required list.
 - Why do we have so many cert variables? How might a user generate a cert per component?
 - ~~We should remove the documentation for `-g` gcr option. For users, we ask them to manaully configure the registry. 
   The docs become very easy to follow.~~
@@ -29,13 +30,12 @@ You need the following CLIs on your system to be able to run the script:
 
 * [`kapp`](https://k14s.io/#install)
 * [`ytt`](https://k14s.io/#install) (v0.26.0+)
+* [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-In addition, you will also probably want [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) for your own debugging and inspection of the system.
-
-Make sure that your Kubernetes config (e.g, `~/.kube/config`) is pointing to the cluster you intend to deploy CF for K8s to.
+> Make sure that your Kubernetes config (e.g, `~/.kube/config`) is pointing to the cluster you intend to deploy CF for K8s to.
 
 ### Kubernetes Cluster Requirements
-:exclamation::exclamation::exclamation: This is a highly experimental project and resource requirements are subject to change in the future. :exclamation::exclamation::exclamation:
+:exclamation: This project is in it's early stages of development and hence the resource requirements are subject to change in the future. This document and the release notes will be updated accordingly. :exclamation:
 
 To deploy cf-for-k8s as is, the cluster should:
 * be running version 1.14.x, 1.15.x, or 1.16.x
@@ -44,14 +44,13 @@ To deploy cf-for-k8s as is, the cluster should:
 
 ### IaaS Requirements
 
-* support LoadBalancer services
-  * requires a workaround on Minikube and Kind, for example
-* define a default StorageClass
+* Support `LoadBalancer` services
+* Define a default `StorageClass`
   * requires [additional config on vSphere](https://vmware.github.io/vsphere-storage-for-kubernetes/documentation/storageclass.html), for example
 
-### Requirements for pushing source-based apps to Cloud Foundry
+### Requirements for pushing source-code based apps to Cloud Foundry
 
-To be able to push source-based apps to your CF for K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration. 
+To be able to push source-code based apps to your CF for K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration. 
 
 > Under the hood, CF for K8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the given registry. Currently, CF for K8s has only been tested with Google Container Registry (GCR) and Dockerhub.com. Ideally, it should work for any external OCI compliant registry.
 
@@ -75,7 +74,7 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
    You can either: a) auto-generate the installation values or b) create the values by yourself.
 
    #### Option A - Use the included hack-script to generate the install values
-   > **NOTE:** The script requires the [BOSH CLI](https://bosh.io/docs/cli-v2-install/#install) in installed on your machine. The BOSH CLI has a handy tool to generate self signed certs and passwords.
+   > **NOTE:** The script requires the [BOSH CLI](https://bosh.io/docs/cli-v2-install/#install) in installed on your machine. The BOSH CLI is an handy tool to generate self signed certs and passwords.
    
    ```console
    $ ./hack/generate-values.sh -d <cf-domain> > /tmp/cf-values.yml
@@ -87,7 +86,7 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
    ```console
    $ copy sample-cf-install-values.yml /tmp/cf-values.yml
    ```
-   2. Open the `cf-values.yml` file and follow the instructions to update the configuration. At minimum you should provide 3 required configuration values.
+   2. Open the `cf-values.yml` file and follow the instructions to update the configuration. At minimum you should provide values for 3 required field.
 
    | Field  |  Details |
    | ------------- | ------------- |
@@ -98,10 +97,10 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
       > **Important** Your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain.
 
 
-1. To enable Cloud Native Buildpacks feature, configure access to an external registry in `cf-values.yml`:
+1. To enable Cloud Native buildpacks feature, configure access to an external registry in `cf-values.yml`:
    1. To configure Dockerhub.com
-      Uncomment dockerhub configuration in `cf-values.yml` and comment Google container registry registry configuration
-      ```console
+      Uncomment dockerhub configuration in `cf-values.yml` and comment out Google container registry registry configuration.
+      ```yml
       app_registry:
          hostname: https://index.docker.io/v1/
          repository: "<my_username>"
@@ -112,7 +111,7 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
       1. Update `<my_username>` with your docker password
 
    1. Configure Google Container Registry
-      ```console
+      ```yml
       app_registry:
          hostname: gcr.io
          repository: gcr.io/<gcp_project_id>/cf-workloads
@@ -123,7 +122,7 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
       1. Update the `gcp_project_id` portion to your GCP Project Id. 
       1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
 
-   > If you do NOT wish to enable Cloud Native Buildpacks support, then remove the `app_registry` block from your `cf-values.yml`
+   > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 
 1. Run the install script with your "CF Install Values" file
    ```console
@@ -173,7 +172,7 @@ $ cf create-org <org-name> && cf target -o <org-name> && cf create-space <space-
 $ cf enable-feature-flag diego_docker
 ```
 
-1. Deploy a source-based app:
+1. Deploy a source-code based app:
 ```console
    $ cf push test-node-app -p tests/smoke/assets/test-node-app
    Pushing app test-node-app to org test-org / space test-space as admin...
@@ -228,9 +227,19 @@ $ cf enable-feature-flag diego_docker
    Hello World
    ```
 
+
+Alternatively, you can validate with a docker image based app
+```console
+$ cf push diego-docker-app -o cloudfoundry/diego-docker-app
+
+$ curl diego-docker-app.<cf-domain>/env
+{...json values...}
+```
+
 ## Delete CF4K8s install
 You can delete CF4K8s deployment by running the following command.
 ```console
 # Assuming that you ran `bin/install.sh...`
 $ kapp delete -a cf
 ```
+
