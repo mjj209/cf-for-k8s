@@ -165,8 +165,8 @@ Assuming you have enabled support for Cloud Native Buildpacks:
 
    ```console
    $ cf create-org <org-name> && cf target -o <org-name> \
-      && cf create-space <space-name> \
-      && cf target -o <org-name> <space-name>
+   && cf create-space <space-name> \
+   && cf target -o <org-name> <space-name>
    ```
    Replace `<org-name>` and `<space-name>` with your desired names
 
