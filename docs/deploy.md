@@ -122,6 +122,8 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
       1. Update the `gcp_project_id` portion to your GCP Project Id. 
       1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
 
+</br>
+
    > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 
 1. Run the install script with your "CF Install Values" file
