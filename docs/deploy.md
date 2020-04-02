@@ -1,7 +1,8 @@
 TODO: 
+- Wait for doc stories to get merged
 - Why do we have so many cert variables? How might a user generate a cert per component?
-- We should remove the documentation for `-g` gcr option. For users, we ask them to manaully configure the registry. 
-  The docs become very easy to follow.
+- ~~We should remove the documentation for `-g` gcr option. For users, we ask them to manaully configure the registry. 
+  The docs become very easy to follow.~~
 
 
 ---
