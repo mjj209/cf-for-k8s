@@ -1,15 +1,21 @@
+TODO: 
+- Why do we have so many cert variables? How might a user generate a cert per component?
+- We should remove the documentation for `-g` gcr option. For users, we ask them to manaully configure the registry. 
+  The docs become very easy to follow.
+
+
+---
 # Deploying CF for K8s
 
 - [Prerequisites](#prerequisites)
   * [Required Tools](#required-tools)
   * [Kubernetes Cluster Requirements](#kubernetes-cluster-requirements)
   * [IaaS Requirements](#iaas-requirements)
-  * [(optional) Requirements for Cloud Native Buildpacks Support](#-optional--requirements-for-cloud-native-buildpacks-support)
+  * [Requirements for Cloud Native Buildpacks Support](#requirements-for-cloud-native-buildpacks-support)
 - [Steps to deploy](#steps-to-deploy)
     + [Option A - Use the included hack-script to generate the install values](#option-a---use-the-included-hack-script-to-generate-the-install-values)
     + [Option B - Create the install values by hand](#option-b---create-the-install-values-by-hand)
-- [Validate the deployment using a image-based app](#validate-the-deployment-using-a-image-based-app)
-- [(optional) Validate the deployment using a source-based app](#optional-validate-the-deployment-using-a-source-based-app)
+- [Validate the deployment using a source-based app](#optional-validate-the-deployment-using-a-source-based-app)
 - [Delete CF4K8s install](#delete-cf4k8s-install)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -42,11 +48,11 @@ To deploy cf-for-k8s as is, the cluster should:
 * define a default StorageClass
   * requires [additional config on vSphere](https://vmware.github.io/vsphere-storage-for-kubernetes/documentation/storageclass.html), for example
 
-### (optional) Requirements for Cloud Native Buildpacks Support
+### Requirements for pushing source-based apps to Cloud Foundry
 
-To be able to push source-based apps to your CF for K8s installation, you will need to enable support for Cloud Native Buildpacks.
+To be able to push source-based apps to your CF for K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration. 
 
-_Note: Currently, when enabling support for buildpack-based applications, CF for K8s has only been validated to work with Google Container Registry (GCR).  Soon, we intend to support any OCI registry that kpack supports._
+> Under the hood, CF for K8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the given registry. Currently, CF for K8s has only been tested with Google Container Registry (GCR) and Dockerhub.com. Ideally, it should work for any external OCI compliant registry.
 
 To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally need to:
   1. create a GCP Service Account with `Storage/Storage Admin` role
@@ -61,38 +67,62 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
    $ cd cf-for-k8s
    ```
 
-1. Set your current kubectl context to your desired Kubernetes cluster
+1. Set your current `kubectl` context to your desired Kubernetes cluster
 
 1. Create a "CF Installation Values" file and configure it:
 
    You can either: a) auto-generate the installation values or b) create the values by yourself.
 
    #### Option A - Use the included hack-script to generate the install values
-   **NOTE:** The script requires the [BOSH CLI](https://bosh.io/docs/cli-v2-install/#install) to generate the install values from `bosh interpolate`
+   > **NOTE:** The script requires the [BOSH CLI](https://bosh.io/docs/cli-v2-install/#install) in installed on your machine. The BOSH CLI has a handy tool to generate self signed certs and passwords.
+   
    ```console
    $ ./hack/generate-values.sh -d <cf-domain> > /tmp/cf-values.yml
    ```
-   (replacing `<cf-domain>` with _your_ registered DNS domain name for your CF installation)
-
-
-   If you wish to enable Cloud Native Buildpacks support, pass in the path to the GCP Service Account JSON:
-   ```console
-   $ ./hack/generate-values.sh -d <cf-domain> -g <path-to-kpack-gcr-service-account> > /tmp/cf-values.yml
-   ```
-   (replacing `<cf-domain>` with _your_ registered DNS domain name for your CF installation and `<path-to-kpack-gcr-service-account>` with the path to your GCP Service Account JSON file)
+   Replace `<cf-domain>` with _your_ registered DNS domain name.
 
    #### Option B - Create the install values by hand
-   1. Create a file called `/tmp/cf-values.yml`. You can use `sample-cf-install-values.yml` in this directory as a starting point
-   1. Open the file and change the `system_domain` and `app_domain` to your desired domain address
-   1. Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values
-      - your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain
+   1. Clone file `sample-cf-install-values.yml` in this directory as a starting point
+   ```console
+   $ copy sample-cf-install-values.yml /tmp/cf-values.yml
+   ```
+   2. Open the `cf-values.yml` file and follow the instructions to update the configuration. At minimum you should provide 3 required configuration values.
 
-   If you wish to enable Cloud Native Buildpacks support, configure access to your Google Container Registry:
-   1. Update the "gcp_project_id" portion of `kpack.registry.repository` to your GCP Project Id
-   1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
+   | Field  |  Details |
+   | ------------- | ------------- |
+   | `system_domain`  | Update to your desired domain address  |
+   | `app_domain`  | Update to your desired domain address |
+   | `system_certificate` | Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values. Certificates and keys should be base64 encoded and valid for your *.<cf-domain>.  |
 
-   If you do NOT wish to enable Cloud Native Buildpacks support:
-   1. Remove the `kubernetes` and `kpack` keys from your `cf-values.yml`
+      > **Important** Your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain.
+
+
+1. To enable Cloud Native Buildpacks feature, configure access to an external registry in `cf-values.yml`:
+   1. To configure Dockerhub.com
+      Uncomment dockerhub configuration in `cf-values.yml` and comment Google container registry registry configuration
+      ```console
+      app_registry:
+         hostname: https://index.docker.io/v1/
+         repository: "<my_username>"
+         username: "<my_username>"
+         password: "<my_password>"
+      ```
+      1. Update `<my_username>` with your docker username
+      1. Update `<my_username>` with your docker password
+
+   1. Configure Google Container Registry
+      ```console
+      app_registry:
+         hostname: gcr.io
+         repository: gcr.io/<gcp_project_id>/cf-workloads
+         username: _json_key
+         password: |
+            <contents_of_service_account_json>
+      ```
+      1. Update the `gcp_project_id` portion to your GCP Project Id. 
+      1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
+
+   > If you do NOT wish to enable Cloud Native Buildpacks support, then remove the `app_registry` block from your `cf-values.yml`
 
 1. Run the install script with your "CF Install Values" file
    ```console
@@ -114,83 +144,33 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
       *.<cf-domain>  A            30   35.111.111.111
       ```
 
-## Validate the deployment using a image-based app
+## Validate the deployment
 
-1. Set up cf cli to point to CF:
-   ```console
-   $ cf api --skip-ssl-validation https://api.<cf-domain>
-   $ cf auth admin <cf_admin_password>
-   ```
+Assuming you have enabled support for Cloud Native Buildpacks:
 
-1. Create an org/space for your app:
-   ```console
-   $ cf create-org test-org
-   $ cf create-space -o test-org test-space
-   $ cf target -o test-org -s test-space
-   ```
+1. Target your CF CLI to point to the new CF instance
 
-1. Enable docker feature:
-   ```console
-   $ cf enable-feature-flag diego_docker
-   ```
+```console
+$ cf api --skip-ssl-validation https://api.<cf-domain>
+```
 
-1. Deploy an app based on a pre-built Docker image:
-   ```console
-   $ cf push test-app -o cloudfoundry/diego-docker-app
-   Pushing app test-app to org test / space test as admin...
-   Getting app info...
-   Creating app with these attributes...
-   + name:           test-app
-   + docker image:   cloudfoundry/diego-docker-app
-     routes:
-   +   test-app.cf.example.com
+1. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml` 
+```console
+$ cf auth admin <cf-values.yml.cf-admin_password>
+```
 
-   Creating app test-app...
-   Mapping routes...
+1. Create an org and space in the new CF instance
+```console
+$ cf create-org <org-name> && cf target -o <org-name> && cf create-space <space-name> && cf target -o <org-name> <space-name>
+```
 
-   Staging app and tracing logs...
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
+1. Enable `diego_docker feature flag
 
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
+> This is a temporary hack to enable cf push in CF for K8s. The team has plans to remove this requirement soon.
 
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-   ```
-
-
-   Waiting for app to start...
-
-   name:                test-app
-   requested state:     started
-   isolation segment:   placeholder
-   routes:              test-app.cf.example.com
-   last uploaded:       Tue 17 Mar 15:48:28 PDT 2020
-   stack:
-   docker image:        cloudfoundry/diego-docker-app
-
-   type:           web
-   instances:      1/1
-   memory usage:   1024M
-        state     since                  cpu    memory    disk      details
-   #0   running   2020-03-17T22:48:29Z   0.0%   0 of 1G   0 of 1G
-
-   ```
-   Note that the "`Failed to retrieve logs...`" messages are expected, at this time given that we're still working on integrating CF logging components.
-
-1. Validate the app is reachable
-   ```console
-   $ curl http://test-app.<cf-domain>/env
-   # should return JSON value
-   ```
-
-## (optional) Validate the deployment using a source-based app
-
-If you have enabled support for Cloud Native Buildpacks:
-
-1. Ensure that you have targeted your CF instance, created and targeted an org/space and enabled the `diego_docker` feature flag, as described above.
+```console
+$ cf enable-feature-flag diego_docker
+```
 
 1. Deploy a source-based app:
 ```console
