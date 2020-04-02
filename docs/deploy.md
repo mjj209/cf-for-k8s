@@ -108,7 +108,7 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
          password: "<my_password>"
       ```
       1. Update `<my_username>` with your docker username
-      1. Update `<my_username>` with your docker password
+      1. Update `<my_password>` with your docker password
 
    1. Configure Google Container Registry
       ```yml
@@ -153,6 +153,7 @@ Assuming you have enabled support for Cloud Native Buildpacks:
 ```console
 $ cf api --skip-ssl-validation https://api.<cf-domain>
 ```
+Replace `<cf-domain>` with your desired domain address
 
 1. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml` 
 ```console
@@ -161,8 +162,11 @@ $ cf auth admin <cf-values.yml.cf-admin_password>
 
 1. Create an org and space in the new CF instance
 ```console
-$ cf create-org <org-name> && cf target -o <org-name> && cf create-space <space-name> && cf target -o <org-name> <space-name>
+$ cf create-org <org-name> && cf target -o <org-name> \
+   && cf create-space <space-name> \
+   && cf target -o <org-name> <space-name>
 ```
+Replace `<org-name>` and `<space-name>` with your desired names
 
 1. Enable `diego_docker feature flag
 
@@ -226,9 +230,10 @@ $ cf enable-feature-flag diego_docker
    $ curl http://test-node-app.<cf-domain>
    Hello World
    ```
+   Replace `<cf-domain>` with your desired domain name
 
 
-Alternatively, you can validate with a docker image based app
+Alternatively, you can validate with a docker image based app,
 ```console
 $ cf push diego-docker-app -o cloudfoundry/diego-docker-app
 
