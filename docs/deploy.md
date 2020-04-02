@@ -150,80 +150,68 @@ Assuming you have enabled support for Cloud Native Buildpacks:
 
 1. Target your CF CLI to point to the new CF instance
 
-```console
-$ cf api --skip-ssl-validation https://api.<cf-domain>
-```
-Replace `<cf-domain>` with your desired domain address
+   ```console
+   $ cf api --skip-ssl-validation https://api.<cf-domain>
+   ```
+   Replace `<cf-domain>` with your desired domain address
 
 1. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml` 
-```console
-$ cf auth admin <cf-values.yml.cf-admin_password>
-```
+
+   ```console
+   $ cf auth admin <cf-values.yml.cf-admin_password>
+   ```
 
 1. Create an org and space in the new CF instance
-```console
-$ cf create-org <org-name> && cf target -o <org-name> \
-   && cf create-space <space-name> \
-   && cf target -o <org-name> <space-name>
-```
-Replace `<org-name>` and `<space-name>` with your desired names
+
+   ```console
+   $ cf create-org <org-name> && cf target -o <org-name> \
+      && cf create-space <space-name> \
+      && cf target -o <org-name> <space-name>
+   ```
+   Replace `<org-name>` and `<space-name>` with your desired names
 
 1. Enable `diego_docker feature flag
 
-> This is a temporary hack to enable cf push in CF for K8s. The team has plans to remove this requirement soon.
+   > This is a temporary hack to enable cf push in CF for K8s. The team has plans to remove this requirement soon.
 
-```console
-$ cf enable-feature-flag diego_docker
-```
+   ```console
+   $ cf enable-feature-flag diego_docker
+   ```
 
 1. Deploy a source-code based app:
-```console
-   $ cf push test-node-app -p tests/smoke/assets/test-node-app
-   Pushing app test-node-app to org test-org / space test-space as admin...
-   Getting app info...
-   Creating app with these attributes...
-   + name:       test-node-app
-     path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
-     routes:
-   +   test-node-app.cf.example.com
+   ```console
+      $ cf push test-node-app -p tests/smoke/assets/test-node-app
+      Pushing app test-node-app to org test-org / space test-space as admin...
+      Getting app info...
+      Creating app with these attributes...
+      + name:       test-node-app
+      path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
+      routes:
+      +   test-node-app.<cf-domain>
 
-   Creating app test-node-app...
-   Mapping routes...
-   Comparing local files to remote cache...
-   Packaging files to upload...
-   Uploading files...
-    498 B / 498 B [==================================================================================================================================================================================================================================================================================================] 100.00% 1s
+      Creating app test-node-app...
+      Mapping routes...
+      Comparing local files to remote cache...
+      Packaging files to upload...
+      Uploading files...
+      .... logs omitted for brevity
 
-   Waiting for API to complete processing files...
+      Waiting for app to start...
 
-   Staging app and tracing logs...
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
+      name:                test-node-app
+      requested state:     started
+      isolation segment:   placeholder
+      routes:              test-node-app.<cf-domain>
+      last uploaded:       Tue 17 Mar 19:24:21 PDT 2020
+      stack:
+      buildpacks:
 
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-
-   Failed to retrieve logs from Log Cache: Get /api/v1/info: unsupported protocol scheme ""
-   
-
-   Waiting for app to start...
-
-   name:                test-node-app
-   requested state:     started
-   isolation segment:   placeholder
-   routes:              test-node-app.cf.example.com
-   last uploaded:       Tue 17 Mar 19:24:21 PDT 2020
-   stack:
-   buildpacks:
-
-   type:           web
-   instances:      1/1
-   memory usage:   1024M
-        state     since                  cpu    memory    disk      details
-   #0   running   2020-03-18T02:24:51Z   0.0%   0 of 1G   0 of 1G
-```
+      type:           web
+      instances:      1/1
+      memory usage:   1024M
+         state     since                  cpu    memory    disk      details
+      #0   running   2020-03-18T02:24:51Z   0.0%   0 of 1G   0 of 1G
+   ```
 
 1. Validate that the app is reachable
    ```console
