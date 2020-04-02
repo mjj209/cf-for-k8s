@@ -180,37 +180,37 @@ Assuming you have enabled support for Cloud Native Buildpacks:
 
 1. Deploy a source-code based app:
    ```console
-      $ cf push test-node-app -p tests/smoke/assets/test-node-app
-      Pushing app test-node-app to org test-org / space test-space as admin...
-      Getting app info...
-      Creating app with these attributes...
-      + name:       test-node-app
-      path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
-      routes:
-      +   test-node-app.<cf-domain>
+   $ cf push test-node-app -p tests/smoke/assets/test-node-app
+   Pushing app test-node-app to org test-org / space test-space as admin...
+   Getting app info...
+   Creating app with these attributes...
+   + name:       test-node-app
+   path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
+   routes:
+   +   test-node-app.<cf-domain>
 
-      Creating app test-node-app...
-      Mapping routes...
-      Comparing local files to remote cache...
-      Packaging files to upload...
-      Uploading files...
-      .... logs omitted for brevity
+   Creating app test-node-app...
+   Mapping routes...
+   Comparing local files to remote cache...
+   Packaging files to upload...
+   Uploading files...
+   .... logs omitted for brevity
 
-      Waiting for app to start...
+   Waiting for app to start...
 
-      name:                test-node-app
-      requested state:     started
-      isolation segment:   placeholder
-      routes:              test-node-app.<cf-domain>
-      last uploaded:       Tue 17 Mar 19:24:21 PDT 2020
-      stack:
-      buildpacks:
+   name:                test-node-app
+   requested state:     started
+   isolation segment:   placeholder
+   routes:              test-node-app.<cf-domain>
+   last uploaded:       Tue 17 Mar 19:24:21 PDT 2020
+   stack:
+   buildpacks:
 
-      type:           web
-      instances:      1/1
-      memory usage:   1024M
-         state     since                  cpu    memory    disk      details
-      #0   running   2020-03-18T02:24:51Z   0.0%   0 of 1G   0 of 1G
+   type:           web
+   instances:      1/1
+   memory usage:   1024M
+      state     since                  cpu    memory    disk      details
+   #0   running   2020-03-18T02:24:51Z   0.0%   0 of 1G   0 of 1G
    ```
 
 1. Validate that the app is reachable
