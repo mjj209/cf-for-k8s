@@ -1,4 +1,4 @@
-# Deploying Cloud Foundry on Kubernetes
+# Deploying Cloud Foundry on a Kubernetes cluster
 
 - [Prerequisites](#prerequisites)
   * [Required Tools](#required-tools)
@@ -106,22 +106,22 @@ Currently, we have tested the following two container registries:
             password: "<my_password>"
 
          ```
-      1. Update `<my_username>` with your docker username.
-      1. Update `<my_password>` with your docker password.
+         1. Update `<my_username>` with your docker username.
+         1. Update `<my_password>` with your docker password.
 
-   1. Configure Google Container Registry
+      1. Configure Google Container Registry
 
-      ```yml
-      app_registry:
-         hostname: gcr.io
-         repository: gcr.io/<gcp_project_id>/cf-workloads
-         username: _json_key
-         password: |
-         <contents_of_service_account_json>
-      ```
+         ```yml
+         app_registry:
+            hostname: gcr.io
+            repository: gcr.io/<gcp_project_id>/cf-workloads
+            username: _json_key
+            password: |
+            <contents_of_service_account_json>
+         ```
 
-      1. Update the `gcp_project_id` portion to your GCP Project Id.
-      1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON.
+         1. Update the `gcp_project_id` portion to your GCP Project Id.
+         1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON.
    </br>
 
    > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
