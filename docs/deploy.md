@@ -1,4 +1,4 @@
-# Deploying CF for K8s
+# Deploying Cloud Foundry on Kubernetes
 
 - [Prerequisites](#prerequisites)
   * [Required Tools](#required-tools)
@@ -23,7 +23,7 @@ You need the following CLIs on your system to be able to run the script:
 * [`ytt`](https://k14s.io/#install) (v0.26.0+)
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
 
-> Make sure that your Kubernetes config (e.g, `~/.kube/config`) is pointing to the cluster you intend to deploy CF for K8s to.
+> Make sure that your Kubernetes config (e.g, `~/.kube/config`) is pointing to the cluster you intend to deploy cf-for-k8s to.
 
 ### Kubernetes Cluster Requirements
 :exclamation: This project is in it's early stages of development and hence the resource requirements are subject to change in the future. This document and the release notes will be updated accordingly. :exclamation:
@@ -41,9 +41,9 @@ To deploy cf-for-k8s as is, the cluster should:
 
 ### Requirements for pushing source-code based apps to Cloud Foundry foundation
 
-To be able to push source-code based apps to your CF for K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration.
+To be able to push source-code based apps to your cf-for-K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration.
 
-> Under the hood, CF for K8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the registry. Thought cf-for-k8s has been tested with Google Container Registry and Dockerhub.com, it should work for any external OCI compliant registry.
+> Under the hood, cf-for-k8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the registry. Thought cf-for-k8s has been tested with Google Container Registry and Dockerhub.com, it should work for any external OCI compliant registry.
 
 Currently, we have tested the following two container registries:
 
@@ -175,7 +175,7 @@ Currently, we have tested the following two container registries:
    $ cf enable-feature-flag diego_docker
    ```
    
-   > This is a temporary hack to enable cf push in CF for K8s. The team has plans to remove this requirement soon.
+   > This is a temporary hack to enable cf push in cf-for-k8s. The team has plans to remove this requirement soon.
 
 1. Deploy a source code based app:
 
