@@ -53,7 +53,7 @@ Currently, we have tested the following two container registries:
   1. create a Service Key JSON and download it to the machine from which you will install cf-for-k8s (referred to, below, as `path-to-kpack-gcr-service-account`)
 
 * Docker Hub:
-  1. Create an account in dockerhub.com. Note down the user name and password you used during signup.
+  1. Create an account in [dockerhub.com](dockerhub.com). Note down the user name and password you used during signup.
   1. Create a repository in your account. Note down the repository name.
 
 ## Steps to deploy
@@ -89,9 +89,9 @@ Currently, we have tested the following two container registries:
 
    ```
 
-   1. Open the file and change the `system_domain` and `app_domain` to your desired domain address
+   1. Open the file and change the `system_domain` and `app_domain` to your desired domain address.
    1. Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values
-      - your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain
+      - **IMPORTANT** Your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain.
 
    1. To enable Cloud Native buildpacks feature, configure access to an external registry in `cf-values.yml`:
 
@@ -124,10 +124,10 @@ Currently, we have tested the following two container registries:
 
       1. Update the `gcp_project_id` portion to your GCP Project Id.
       1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
-
+   </br>
    > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 
-3. Run the install script with your "CF Install Values" file
+1. Run the install script with your "CF Install Values" file.
 
 ```console
 
@@ -135,7 +135,10 @@ $ ./bin/install-cf.sh /tmp/cf-values.yml
 
 ```
 
-4. Configure DNS on your IaaS provider to point the wildcard subdomain of your system domain and the wildcard subdomain of all apps domains to point to external IP of the Istio Ingress Gateway service. You can retrieve the external IP of this service by running
+> cf-for-k8s uses [kapp](https://github.com/k14s/kapp) to manage it's lifecycle. `kapp` will first show you a list of resources it plans to install on the cluster and then will attempt to install those resources. `kapp` will not exit untill all resources are installed and their status is running.
+
+
+1. Configure DNS on your IaaS provider to point the wildcard subdomain of your system domain and the wildcard subdomain of all apps domains to point to external IP of the Istio Ingress Gateway service. You can retrieve the external IP of this service by running
 
 ```
 kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[*].ip}'
@@ -159,11 +162,11 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
 	
 2. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml`
 
-```console
+   ```console
 
-$ cf auth admin <cf-values.yml.cf-admin_password>
+   $ cf auth admin <cf-values.yml.cf-admin_password>
 
-```
+   ```
 
 4. Create an org/space for your app:
    ```console
@@ -182,69 +185,42 @@ $ cf auth admin <cf-values.yml.cf-admin_password>
 
 6. Deploy a source code based app:
 
-```console
+   ```console
 
-$ cf push test-node-app -p tests/smoke/assets/test-node-app
+   $ cf push test-node-app -p tests/smoke/assets/test-node-app
 
-Pushing app test-node-app to org test-org / space test-space as admin...
+   Pushing app test-node-app to org test-org / space test-space as admin...
+   Getting app info...
+   Creating app with these attributes...
 
-Getting app info...
+   name: test-node-app
+   path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
+   routes: test-node-app.<cf-domain>  
 
-Creating app with these attributes...
+   Creating app test-node-app...
+   Mapping routes...
+   Comparing local files to remote cache...
+   Packaging files to upload...
+   Uploading files...
 
-+ name: test-node-app
+   .... logs omitted for brevity
+   
 
-path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
+   Waiting for app to start...
 
-routes:
+   name: test-node-app
+   requested state: started
+   isolation segment: placeholder
+   routes: test-node-app.<cf-domain>
+   last uploaded: Tue 17 Mar 19:24:21 PDT 2020
+   stack:
+   buildpacks:
 
-+ test-node-app.<cf-domain>
-
-  
-
-Creating app test-node-app...
-
-Mapping routes...
-
-Comparing local files to remote cache...
-
-Packaging files to upload...
-
-Uploading files...
-
-.... logs omitted for brevity
-
-  
-
-Waiting for app to start...
-
-  
-
-name: test-node-app
-
-requested state: started
-
-isolation segment: placeholder
-
-routes: test-node-app.<cf-domain>
-
-last uploaded: Tue 17 Mar 19:24:21 PDT 2020
-
-stack:
-
-buildpacks:
-
-  
-
-type: web
-
-instances: 1/1
-
-memory usage: 1024M
-
-state since cpu memory disk details
-
-#0 running 2020-03-18T02:24:51Z 0.0% 0 of 1G 0 of 1G
+   type: web
+   instances: 1/1
+   memory usage: 1024M
+   state since cpu memory disk details
+   #0 running 2020-03-18T02:24:51Z 0.0% 0 of 1G 0 of 1G
 
 ```   
 
@@ -258,17 +234,17 @@ state since cpu memory disk details
 
 Alternatively, you can validate with a docker image based app,
 
-```console
-$ cf push diego-docker-app -o cloudfoundry/diego-docker-app
+   ```console
+   $ cf push diego-docker-app -o cloudfoundry/diego-docker-app
 
-$ curl diego-docker-app.<cf-domain>/env
-{...json values...}
-```
+   $ curl diego-docker-app.<cf-domain>/env
+   {...json values...}
+   ```
 
 ## Delete CF4K8s install
 You can delete CF4K8s deployment by running the following command.
-```console
-# Assuming that you ran `bin/install.sh...`
-$ kapp delete -a cf
-```
+   ```console
+   # Assuming that you ran `bin/install.sh...`
+   $ kapp delete -a cf
+   ```
 
