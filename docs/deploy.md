@@ -175,7 +175,7 @@ Currently, we have tested the following two container registries:
    $ cf enable-feature-flag diego_docker
    ```
    
-   > This is a temporary hack to enable cf push in cf-for-k8s. The team has plans to remove this requirement soon.
+   > This is a temporary requirement to enable cf-push. The team has plans to remove this requirement soon.
 
 1. Deploy a source code based app:
 
