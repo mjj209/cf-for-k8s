@@ -47,25 +47,23 @@ To be able to push source-code based apps to your CF for K8s installation, you w
 
 Currently, we have tested the following two container registries:
 
-* Google Container Registry:
-  1. create a GCP Service Account with `Storage/Storage Admin` role
-      * (optionally) if you want to limit the permissions this service account has, see https://cloud.google.com/container-registry/docs/access-control for the minimum permission set.
-  1. create a Service Key JSON and download it to the machine from which you will install cf-for-k8s (referred to, below, as `path-to-kpack-gcr-service-account`)
-
 * Docker Hub:
   1. Create an account in [dockerhub.com](dockerhub.com). Note down the user name and password you used during signup.
   1. Create a repository in your account. Note down the repository name.
 
+* Google Container Registry:
+  1. Create a GCP Service Account with `Storage/Storage Admin` role.
+      * (optionally) if you want to limit the permissions this service account has, see https://cloud.google.com/container-registry/docs/access-control for the minimum permission set.
+  1. Create a Service Key JSON and download it to the machine from which you will install cf-for-k8s (referred to, below, as `path-to-kpack-gcr-service-account`).
+
 ## Steps to deploy
 
 1. Clone and initialize this git repository:
+
    ```console
    $ git clone https://github.com/cloudfoundry/cf-for-k8s.git
    $ cd cf-for-k8s
    ```
-
-1. Set your current kubectl context to your desired Kubernetes cluster
-
 1. Create a "CF Installation Values" file and configure it:
 
    You can either: a) auto-generate the installation values or b) create the values by yourself.
@@ -83,11 +81,11 @@ Currently, we have tested the following two container registries:
    #### Option B - Create the install values by hand
    1. Clone file `sample-cf-install-values.yml` in this directory as a starting point.
    
-   ```console
+      ```console
 
-   $ copy sample-cf-install-values.yml /tmp/cf-values.yml
+      $ copy sample-cf-install-values.yml /tmp/cf-values.yml
 
-   ```
+      ```
 
    1. Open the file and change the `system_domain` and `app_domain` to your desired domain address.
    1. Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values
@@ -108,8 +106,8 @@ Currently, we have tested the following two container registries:
             password: "<my_password>"
 
          ```
-      1. Update `<my_username>` with your docker username
-      1. Update `<my_password>` with your docker password
+      1. Update `<my_username>` with your docker username.
+      1. Update `<my_password>` with your docker password.
 
    1. Configure Google Container Registry
 
@@ -123,20 +121,17 @@ Currently, we have tested the following two container registries:
       ```
 
       1. Update the `gcp_project_id` portion to your GCP Project Id.
-      1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
+      1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON.
    </br>
-   > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 
+   > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 1. Run the install script with your "CF Install Values" file.
 
 ```console
-
 $ ./bin/install-cf.sh /tmp/cf-values.yml
-
 ```
 
 > cf-for-k8s uses [kapp](https://github.com/k14s/kapp) to manage it's lifecycle. `kapp` will first show you a list of resources it plans to install on the cluster and then will attempt to install those resources. `kapp` will not exit untill all resources are installed and their status is running.
-
 
 1. Configure DNS on your IaaS provider to point the wildcard subdomain of your system domain and the wildcard subdomain of all apps domains to point to external IP of the Istio Ingress Gateway service. You can retrieve the external IP of this service by running
 
@@ -160,7 +155,7 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
    ```
 	Replace `<cf-domain>` with your desired domain 	address.
 	
-2. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml`
+1. Login using the admin credentials for key `cf_admin_password` in `/tmp/cf-values.yml`
 
    ```console
 
@@ -168,14 +163,14 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
 
    ```
 
-4. Create an org/space for your app:
+1. Create an org/space for your app:
    ```console
    $ cf create-org test-org
    $ cf create-space -o test-org test-space
    $ cf target -o test-org -s test-space
    ```
 
-5. Enable docker feature:
+1. Enable docker feature:
    ```console
    $ cf enable-feature-flag diego_docker
    ```
@@ -183,7 +178,7 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
 > This is a temporary hack to enable cf push in CF for K8s. The team has plans to remove this requirement soon.
 
 
-6. Deploy a source code based app:
+1. Deploy a source code based app:
 
    ```console
 
@@ -222,11 +217,12 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
    state since cpu memory disk details
    #0 running 2020-03-18T02:24:51Z 0.0% 0 of 1G 0 of 1G
 
-```   
+``` 
 
    > Note that the "`Failed to retrieve logs...`" messages are expected, at this time given that we're still working on integrating CF logging components.
 
-7. Validate the app is reachable
+1. Validate the app is reachable
+
    ```console
    $ curl http://test-node-app.<cf-domain>/env
    Hello World
