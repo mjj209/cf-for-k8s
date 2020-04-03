@@ -26,7 +26,7 @@ You need the following CLIs on your system to be able to run the script:
 > Make sure that your Kubernetes config (e.g, `~/.kube/config`) is pointing to the cluster you intend to deploy CF for K8s to.
 
 ### Kubernetes Cluster Requirements
-:exclamation: This project is in it's early stages of development and hence the resource requirements are subject to change in the future. This document and the release notes will be updated accordingly :exclamation:
+:exclamation: This project is in it's early stages of development and hence the resource requirements are subject to change in the future. This document and the release notes will be updated accordingly. :exclamation:
 
 To deploy cf-for-k8s as is, the cluster should:
 * be running version 1.14.x, 1.15.x, or 1.16.x
@@ -43,18 +43,18 @@ To deploy cf-for-k8s as is, the cluster should:
 
 To be able to push source-code based apps to your CF for K8s installation, you will need to add OCI compliant registry (e.g. dockerhub.com) to the configuration.
 
-> Under the hood, CF for K8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the given registry. Currently, CF for K8s has only been tested with Google Container Registry (GCR) and Dockerhub.com. Ideally, it should work for any external OCI compliant registry.
+> Under the hood, CF for K8s uses Cloud Native buildpacks to detect and build the app source code into an oci compliant image and pushes the app image to the registry. Thought cf-for-k8s has been tested with Google Container Registry and Dockerhub.com, it should work for any external OCI compliant registry.
 
-To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally need to specify some settings and credentials for a container image registry.  Currently, we have tested the following two container registries:
+Currently, we have tested the following two container registries:
 
 * Google Container Registry:
   1. create a GCP Service Account with `Storage/Storage Admin` role
-      * (optionally) if you want to limit the permissions this service account has, see https://cloud.google.com/container-registry/docs/access-control for the minimum permission set
+      * (optionally) if you want to limit the permissions this service account has, see https://cloud.google.com/container-registry/docs/access-control for the minimum permission set.
   1. create a Service Key JSON and download it to the machine from which you will install cf-for-k8s (referred to, below, as `path-to-kpack-gcr-service-account`)
 
-* Docker Hub and other OCI registries:
-  1. Uncomment the docker hub block in sample-cf-install-values and fill in with appropriate values.
-  1. Comment the gcr block.
+* Docker Hub:
+  1. Create an account in dockerhub.com. Note down the user name and password you used during signup.
+  1. Create a repository in your account. Note down the repository name.
 
 ## Steps to deploy
 
@@ -80,68 +80,52 @@ To deploy cf-for-k8s with the Cloud Native Buildpacks feature, you additionally 
    
    Replace `<cf-domain>` with _your_ registered DNS domain name for your CF installation.
 
-#### Option B - Create the install values by hand
+   #### Option B - Create the install values by hand
    1. Clone file `sample-cf-install-values.yml` in this directory as a starting point.
    
-```console
+   ```console
 
-$ copy sample-cf-install-values.yml /tmp/cf-values.yml
+   $ copy sample-cf-install-values.yml /tmp/cf-values.yml
 
-```
+   ```
 
    1. Open the file and change the `system_domain` and `app_domain` to your desired domain address
    1. Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values
       - your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain
 
-1. To enable Cloud Native buildpacks feature, configure access to an external registry in `cf-values.yml`:
+   1. To enable Cloud Native buildpacks feature, configure access to an external registry in `cf-values.yml`:
 
-1. To configure Dockerhub.com
+      1. To configure Dockerhub.com
 
-Uncomment dockerhub configuration in `cf-values.yml` and comment out Google container registry registry configuration.
+         Uncomment dockerhub configuration in `cf-values.yml` and comment out Google container registry registry configuration.
 
-```yml
+         ```yml
 
-app_registry:
+         app_registry:
+            hostname: https://index.docker.io/v1/
+            repository: "<my_username>"
+            username: "<my_username>"
+            password: "<my_password>"
 
-hostname: https://index.docker.io/v1/
+         ```
+      1. Update `<my_username>` with your docker username
+      1. Update `<my_password>` with your docker password
 
-repository: "<my_username>"
+   1. Configure Google Container Registry
 
-username: "<my_username>"
+      ```yml
+      app_registry:
+         hostname: gcr.io
+         repository: gcr.io/<gcp_project_id>/cf-workloads
+         username: _json_key
+         password: |
+         <contents_of_service_account_json>
+      ```
 
-password: "<my_password>"
+      1. Update the `gcp_project_id` portion to your GCP Project Id.
+      1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
 
-```
-
-1. Update `<my_username>` with your docker username
-
-1. Update `<my_password>` with your docker password
-
-  
-
-1. Configure Google Container Registry
-
-```yml
-
-app_registry:
-
-hostname: gcr.io
-
-repository: gcr.io/<gcp_project_id>/cf-workloads
-
-username: _json_key
-
-password: |
-
-<contents_of_service_account_json>
-
-```
-
-1. Update the `gcp_project_id` portion to your GCP Project Id.
-
-1. Change `contents_of_service_account_json` to be the entire contents of your GCP Service Account JSON
-
-> If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
+   > If you do NOT wish to enable Cloud Native Buildpacks feature, then remove the `app_registry` block from your `cf-values.yml`
 
 3. Run the install script with your "CF Install Values" file
 
