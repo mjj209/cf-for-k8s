@@ -131,7 +131,7 @@ Currently, we have tested the following two container registries:
 $ ./bin/install-cf.sh /tmp/cf-values.yml
 ```
 
-   > cf-for-k8s uses [kapp](https://github.com/k14s/kapp) to manage it's lifecycle. `kapp` will first show you a list of resources it plans to install on the cluster and then will attempt to install those resources. `kapp` will not exit untill all resources are installed and their status is running.
+> cf-for-k8s uses [kapp](https://github.com/k14s/kapp) to manage it's lifecycle. `kapp` will first show you a list of resources it plans to install on the cluster and then will attempt to install those resources. `kapp` will not exit untill all resources are installed and their status is running.
 
 1. Configure DNS on your IaaS provider to point the wildcard subdomain of your system domain and the wildcard subdomain of all apps domains to point to external IP of the Istio Ingress Gateway service. You can retrieve the external IP of this service by running
 
@@ -216,8 +216,8 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
    state since cpu memory disk details
    #0 running 2020-03-18T02:24:51Z 0.0% 0 of 1G 0 of 1G
 
-``` 
-
+   ```
+   </br>
    > Note that the "`Failed to retrieve logs...`" messages are expected, at this time given that we're still working on integrating CF logging components.
 
 1. Validate the app is reachable
