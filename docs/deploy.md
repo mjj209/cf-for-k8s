@@ -218,6 +218,7 @@ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadB
 
    ```
    </br>
+   
    > Note that the "`Failed to retrieve logs...`" messages are expected, at this time given that we're still working on integrating CF logging components.
 
 1. Validate the app is reachable
