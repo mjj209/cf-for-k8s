@@ -21,9 +21,6 @@ cf_db:
   admin_password: ""
   enabled: true
 
-#! reserved static ip for istio LoadBalancer
-istio_static_ip: ""
-
 images:
   capi: ""
   nginx: ""
@@ -153,4 +150,3 @@ metric_proxy:
     secret_name: "metric-proxy-cert"
     crt: ""
     key: ""
-

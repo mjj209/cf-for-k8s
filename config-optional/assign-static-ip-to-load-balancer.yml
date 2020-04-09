@@ -1,0 +1,10 @@
+#@ load("@ytt:assert", "assert")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#! This will set overlay a static IP for the istio load balancer.
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata":{"name": "istio-ingressgateway"}})
+---
+spec:
+  #@overlay/match missing_ok=True
+  loadBalancerIP: #@ data.values.loadbalancer_static_ip if len(data.values.loadbalancer_static_ip) > 0 else assert.fail("Missing required loadbalancer_static_ip value")
