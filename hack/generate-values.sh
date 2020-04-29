@@ -207,7 +207,12 @@ system_certificate:
   #! This certificates and keys are base64 encoded and should be valid for *.system.cf.example.com
   crt: &crt $( bosh interpolate ${VARS_FILE} --path=/system_certificate/certificate | base64 | tr -d '\n' )
   key: &key $( bosh interpolate ${VARS_FILE} --path=/system_certificate/private_key | base64 | tr -d '\n' )
-  ca: $( bosh interpolate ${VARS_FILE} --path=/system_certificate/ca | base64 | tr -d '\n' )
+  ca: &ca $( bosh interpolate ${VARS_FILE} --path=/system_certificate/ca | base64 | tr -d '\n' )
+
+workloads_certificate:
+  crt: *crt
+  key: *key
+  ca: *ca
 
 log_cache_ca:
   crt: $( bosh interpolate ${VARS_FILE} --path=/log_cache_ca/certificate | base64 | tr -d '\n' )
