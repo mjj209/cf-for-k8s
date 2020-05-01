@@ -149,6 +149,9 @@ app_registry:
   username: ""
   password: ""
 
+metrics_server:
+  enable: false
+
 metric_proxy:
   ca:
     secret_name: "metric-proxy-ca"
