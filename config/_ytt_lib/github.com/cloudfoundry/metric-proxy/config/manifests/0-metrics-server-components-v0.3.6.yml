@@ -1,4 +1,6 @@
-#@ if data.values.metrics_server.enable:
+#@ load("@ytt:data", "data")
+
+#@ if data.values.metric_proxy.enable_metrics_server:
 #! Deploy metrics-server components.yaml v0.3.6
 #! https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
 ---
@@ -81,7 +83,7 @@ spec:
     spec:
       serviceAccountName: metrics-server
       volumes:
-      # mount in tmp so we can safely use from-scratch images and/or read-only containers
+      #! mount in tmp so we can safely use from-scratch images and/or read-only containers
       - name: tmp-dir
         emptyDir: {}
       containers:

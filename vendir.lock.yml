@@ -13,8 +13,8 @@ directories:
       url: https://api.github.com/repos/cloudfoundry/cf-k8s-logging/releases/26057148
     path: github.com/cloudfoundry/cf-k8s-logging/config
   - git:
-      commitTitle: Include metrics-server deployment...
-      sha: 4bebb3db5c30aa692bcbbb03698a943dda58fe1e
+      commitTitle: Change metrics-server key name and nest under metric_proxy key...
+      sha: 5a8f3753a96487f186b6e1ff1bd5721d3eefac72
     path: github.com/cloudfoundry/metric-proxy
   - git:
       commitTitle: 'Merge pull request #1262 from cloudfoundry/dependabot/go_modules/k8s/k8s.io/api-0.18.1'

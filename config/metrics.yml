@@ -7,6 +7,7 @@ system_domain: #@ data.values.system_domain
 system_namespace: #@ data.values.system_namespace
 
 metric_proxy:
+  enable_metrics_server: #@ data.values.metric_proxy.enable_metrics_server
   ca:
     secret_name: "metric-proxy-ca"
     crt: #@ data.values.metric_proxy.ca.crt
