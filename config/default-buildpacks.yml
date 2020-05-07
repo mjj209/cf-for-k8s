@@ -1,5 +1,4 @@
 #@ load("@ytt:data", "data")
-#@ load("@ytt:overlay", "overlay")
 
 ---
 apiVersion: experimental.kpack.pivotal.io/v1alpha1
@@ -27,10 +26,10 @@ spec:
 apiVersion: experimental.kpack.pivotal.io/v1alpha1
 kind: CustomBuilder
 metadata:
-  name: cf-autodetect-builder
+  name: cf-default-builder
   namespace: #@ data.values.staging_namespace
 spec:
-  tag: #@ "{}/cf-autodetect-builder".format(data.values.app_registry.repository)
+  tag: #@ "{}/cf-default-builder".format(data.values.app_registry.repository)
   serviceAccount: cc-kpack-registry-service-account
   stack: cflinuxfs3-stack
   store: cf-buildpack-store
@@ -43,6 +42,3 @@ spec:
     - id: paketo-buildpacks/go
   - group:
     - id: paketo-buildpacks/dotnet-core
-
-#@overlay/match by=overlay.subset({"kind":"Builder","metadata":{"name":"cf-autodetect-builder"}})
-#@overlay/remove
