@@ -48,7 +48,7 @@ In addition to the Kubernetes version requirement in [Deploying CF for K8s](depl
 
 1. Follow the instructions in [Deploying CF for K8s](deploy.md).
 
-   - Enable the `metrics-server` by setting `metrics_proxy.enable_metrics_server: true` in <cf_install_values_path>.
+   - Enable the `metrics-server` by setting `metric_proxy.enable_metrics_server: true` in <cf_install_values_path>.
    - Include the [remove-resource-requirements.yml](../config-optional/remove-resource-requirements.yml),
      [remove-ingressgateway-service.yml](../config-optional/remove-ingressgateway-service.yml), and
      [patch-metrics-server.yml](../config-optional/patch-metrics-server.yml)
