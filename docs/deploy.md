@@ -38,12 +38,7 @@ To deploy cf-for-k8s as is, the cluster should:
 - have a minimum of 3 CPU, 7.5GB memory per node
 - support `LoadBalancer` services
 - support `metrics-server`
-  - Most IaaSes come with `metrics-server`, but if yours does not come with it or if you're using `kind`, then you may want to run something like 
-  
-  ```console
-    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
-  ```
-
+  - Most IaaSes come with `metrics-server`, but if yours does not come with it or if you're using `kind`, you will need to enable it in the deploy step.
 - defines a default StorageClass
   - requires [additional config on vSphere](https://vmware.github.io/vsphere-storage-for-kubernetes/documentation/storageclass.html), for example
 
@@ -101,6 +96,20 @@ This project is in it's early stages of development and hence there are features
    1. Generate certificates for the above domains and paste them in `crt`, `key`, `ca` values
       - **IMPORTANT** Your certificates must include a subject alternative name entry for the internal `*.cf-system.svc.cluster.local` domain in addition to your chosen external domain.
 
+1. To enable the `metrics-server` if your IaaS does not provide it, update the `cf-values.yml` file to include `metric_proxy.enable_metrics_server: true`. It should look like the following:
+   file:
+
+   ```yml
+   metric_proxy:
+     enable_metrics_server: true
+     ca:
+       crt: <some-generated-cert>
+       key: <some-generated-key>
+     cert:
+       crt: <some-generated-cert>
+       key: <some-generated-key>
+   ```
+
 1. To enable Cloud Native buildpacks feature, configure access to an external registry in `cf-values.yml`:
 
    You can choose any of the cloud provider container registries, such as [dockerhub.com](dockerhub.com), [Google container registry](https://cloud.google.com/container-registry), [Azure container registry](https://azure.microsoft.com/en-us/services/container-registry/) and so on. Below are examples for dockerhub or google container registry.
@@ -142,9 +151,9 @@ This project is in it's early stages of development and hence there are features
       ```console
       ytt -f config -f /tmp/cf-values.yml > /tmp/cf-for-k8s-rendered.yml
       ```
-      > cf-for-k8s uses [ytt](https://github.com/k14s/ytt) to create and maintain reusable YAML templates. You can visit the ytt [playground](https://get-ytt.io/) to learn more about it's templating features. 
+      > cf-for-k8s uses [ytt](https://github.com/k14s/ytt) to create and maintain reusable YAML templates. You can visit the ytt [playground](https://get-ytt.io/) to learn more about it's templating features.
       > In the above command, `ytt` can take a folder e.g. `config` or file via `-f`. See all options by running `ytt help`.
-    
+
       ii. Install using `kapp` and pass the above K8s configuration file
       ```console
       kapp deploy -a cf -f /tmp/cf-for-k8s-rendered.yml -y
@@ -152,7 +161,7 @@ This project is in it's early stages of development and hence there are features
       > cf-for-k8s uses [kapp](https://github.com/k14s/kapp) to manage it's lifecycle. `kapp` will first show you a list of resources it plans to install on the cluster and then will attempt to install those resources. `kapp` will not exit untill all resources are installed and their status is running. See all options by running `kapp help`.
 
    Once you run the command, it should take about 10 minutes depending on your cluster bandwidth, size. `kapp` will provide updates on pending resource creations in the cluster and will wait until all resources are created and running. Here is a sample snippet from `kapp` output:
-   
+
    ```console
    4:08:19PM: ---- waiting on 1 changes [0/1 done] ----
    4:08:19PM: ok: reconcile serviceaccount/cc-kpack-registry-service-account (v1) namespace: cf-workloads-staging
@@ -213,7 +222,7 @@ This project is in it's early stages of development and hence there are features
 
    name: test-node-app
    path: /Users/pivotal/workspace/cf-for-k8s/tests/smoke/assets/test-node-app
-   routes: test-node-app.<cf-domain>  
+   routes: test-node-app.<cf-domain>
 
    Creating app test-node-app...
    Mapping routes...
