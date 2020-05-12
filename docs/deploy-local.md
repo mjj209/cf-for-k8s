@@ -72,8 +72,8 @@ In addition to the Kubernetes version requirement in [Deploying CF for K8s](depl
 
 1. Enable metrics-server.
 
-   ```bash
-   $ minikube addons enable metrics-server
+   ```console
+   minikube addons enable metrics-server
    ```
 
 1. Obtain minikube IP.
